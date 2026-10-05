@@ -68,7 +68,7 @@
             <div id="choice-buttons" class="hidden flex-col gap-4 w-full">
                 <div class="flex flex-col sm:flex-row gap-4 w-full">
                     <button onclick="handleChoice('garing')" class="flex-1 py-3.5 px-6 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-pixel text-xs text-slate-300 transition hover:scale-105 active:scale-95 shadow-lg">
-                        kirim pesan lain
+                        kirim pesan lainnya
                     </button>
                     <button onclick="handleChoice('love')" class="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 font-pixel text-xs text-white transition hover:scale-105 active:scale-95 shadow-lg shadow-pink-600/30">
                         💖 I Love You Too
@@ -117,7 +117,6 @@
         const TELEGRAM_CHAT_ID = "8982086580";
 
         const dialogLines = [
-            "dari sarul...",
             "buah nangka...",
             "buah kedondong...",
             "i love you beb ❤️"
@@ -133,11 +132,15 @@
         const loveModal = document.getElementById('love-modal');
         const errorMsg = document.getElementById('error-msg');
 
-        function playSynthSound(freq = 440, duration = '16n') {
+        function playSynthSound() {
             if (!isSoundOn) return;
             try {
+                // Memastikan AudioContext aktif (interaksi browser)
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
                 const synth = new Tone.Synth().toDestination();
-                synth.triggerAttackRelease(freq, duration);
+                synth.triggerAttackRelease("C5", "32n");
             } catch (e) {}
         }
 
@@ -147,21 +150,21 @@
                 if (charIdx < currentLine.length) {
                     typingTextEl.textContent += currentLine.charAt(charIdx);
                     charIdx++;
-                    playSynthSound(300 + (charIdx * 20), '16n');
-                    setTimeout(typeNextChar, 80);
+                    playSynthSound(); // Bunyi pas banget per huruf muncul
+                    setTimeout(typeNextChar, 100); // Jeda diperlambat sedikit (100ms) agar sinkron dengan suara
                 } else {
                     setTimeout(() => {
                         lineIdx++;
                         charIdx = 0;
                         if (lineIdx < dialogLines.length) {
                             typingTextEl.textContent = '';
-                            setTimeout(typeNextChar, 400);
+                            setTimeout(typeNextChar, 600); // Jeda antar kalimat
                         } else {
                             typingTextEl.classList.remove('cursor-blink');
                             choiceBtns.classList.remove('hidden');
                             choiceBtns.classList.add('flex');
                         }
-                    }, 1200);
+                    }, 1400);
                 }
             }
         }
@@ -244,7 +247,7 @@
         }
 
         window.onload = () => {
-            setTimeout(typeNextChar, 500);
+            setTimeout(typeNextChar, 800);
         };
     </script>
 </body>
