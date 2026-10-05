@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesan Spesial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;600;800&display=swap');
+
+        .font-pixel { font-family: 'Press Start 2P', cursive; }
+        .font-sans { font-family: 'Outfit', sans-serif; }
+
+        .crt-overlay::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 50;
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .neon-box-pink {
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.3), inset 0 0 15px rgba(236, 72, 153, 0.1);
+        }
+
+        .cursor-blink::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between crt-overlay select-none relative overflow-x-hidden">
+
+    <header class="p-4 md:p-6 flex justify-between items-center z-10 border-b border-slate-800 bg-slate-900/60 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-heart text-pink-500 text-xl animate-pulse"></i>
+            <span class="font-pixel text-xs md:text-sm text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-400 to-cyan-400">KATA KATA DARI SARUL</span>
+        </div>
+        <button id="sound-btn" onclick="toggleSound()" class="p-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition text-xs flex items-center gap-2">
+            <i id="sound-icon" class="fa-solid fa-volume-high text-pink-400"></i>
+            <span id="sound-text" class="hidden md:inline font-semibold">SUARA: ON</span>
+        </button>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-4 relative z-10 my-4">
+
+        <section id="dialog-screen" class="w-full max-w-lg bg-slate-900/90 border border-pink-500/30 rounded-3xl p-6 md:p-8 neon-box-pink backdrop-blur-md flex flex-col items-center text-center">
+            
+            <div class="w-20 h-20 rounded-full bg-pink-500/10 border-2 border-pink-500/40 flex items-center justify-center text-pink-400 text-3xl mb-6 shadow-lg shadow-pink-500/20">
+                <i class="fa-solid fa-envelope-open-text animate-bounce"></i>
+            </div>
+
+            <div class="min-h-[140px] w-full bg-slate-950/80 border border-slate-800 rounded-2xl p-5 mb-6 flex items-center justify-center">
+                <p id="typing-text" class="font-pixel text-sm md:text-base text-pink-300 leading-relaxed cursor-blink"></p>
+            </div>
+
+            <div id="choice-buttons" class="hidden flex-col sm:flex-row gap-4 w-full">
+                <button onclick="handleChoice('garing')" class="flex-1 py-3.5 px-6 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-pixel text-xs text-slate-300 transition hover:scale-105 active:scale-95 shadow-lg">
+                    😅 Garing
+                </button>
+                <button onclick="handleChoice('love')" class="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 font-pixel text-xs text-white transition hover:scale-105 active:scale-95 shadow-lg shadow-pink-600/30">
+                    💖 I Love You Too
+                </button>
+            </div>
+
+            <div id="comment-modal" class="hidden w-full mt-4 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-left">
+                <p class="text-xs text-pink-400 font-semibold mb-2"><i class="fa-solid fa-comment-dots"></i> Pesan anonim kamu:</p>
+                <textarea id="comment-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-pink-500 mb-3 resize-none select-text cursor-text" placeholder="Ketik pesan kamu di sini..."></textarea>
+                
+                <button id="btn-send-garing" onclick="sendGaringMessage()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-pixel text-xs text-white rounded-xl transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> Kirim Pesan
+                </button>
+            </div>
+
+            <div id="love-modal" class="hidden w-full mt-4 bg-pink-950/40 border border-pink-500/40 rounded-2xl p-5 text-center">
+                <p class="font-pixel text-xs text-pink-300 mb-2">Aww, makasih! 🥰❤️</p>
+                <p id="love-status" class="text-xs text-slate-300">Pesan kamu berhasil terkirim secara anonim!</p>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx3sLvjn1dFCg2cxy7fZ87mZQjb9fqfwmdMeGo3Pf6HkazL4OupI_gSoEubneYN_Gk/exec";
+
+        // Teks jalannya ditambah kata-kata dari sarul di paling awal
+        const dialogLines = [
+            "kata kata dari sarul",
+            "buah nangka...",
+            "buah kedondong...",
+            "i love you beb ❤️"
+        ];
+
+        let lineIdx = 0;
+        let charIdx = 0;
+        let isSoundOn = true;
+
+        const typingTextEl = document.getElementById('typing-text');
+        const choiceBtns = document.getElementById('choice-buttons');
+        const commentModal = document.getElementById('comment-modal');
+        const loveModal = document.getElementById('love-modal');
+
+        function playSynthSound(freq = 440, duration = '16n') {
+            if (!isSoundOn) return;
+            try {
+                const synth = new Tone.Synth().toDestination();
+                synth.triggerAttackRelease(freq, duration);
+            } catch (e) {}
+        }
+
+        function typeNextChar() {
+            if (lineIdx < dialogLines.length) {
+                const currentLine = dialogLines[lineIdx];
+                if (charIdx < currentLine.length) {
+                    typingTextEl.textContent += currentLine.charAt(charIdx);
+                    charIdx++;
+                    playSynthSound(300 + (charIdx * 20), '16n');
+                    setTimeout(typeNextChar, 80);
+                } else {
+                    setTimeout(() => {
+                        lineIdx++;
+                        charIdx = 0;
+                        if (lineIdx < dialogLines.length) {
+                            typingTextEl.textContent = '';
+                            setTimeout(typeNextChar, 400);
+                        } else {
+                            typingTextEl.classList.remove('cursor-blink');
+                            choiceBtns.classList.remove('hidden');
+                            choiceBtns.classList.add('flex');
+                        }
+                    }, 1200);
+                }
+            }
+        }
+
+        function handleChoice(type) {
+            choiceBtns.classList.add('hidden');
+            
+            if (type === 'garing') {
+                commentModal.classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('comment-input').focus();
+                }, 100);
+            } else if (type === 'love') {
+                loveModal.classList.remove('hidden');
+                sendToGoogleSheets("I Love You Too", "💖 I Love You Too!");
+            }
+        }
+
+        function sendGaringMessage() {
+            const text = document.getElementById('comment-input').value.trim();
+            if (!text) {
+                alert('Tulis pesan terlebih dahulu!');
+                return;
+            }
+
+            const btn = document.getElementById('btn-send-garing');
+            btn.innerText = "Mengirim...";
+            btn.disabled = true;
+
+            sendToGoogleSheets("Garing", text, () => {
+                commentModal.classList.add('hidden');
+                loveModal.classList.remove('hidden');
+                document.getElementById('love-status').textContent = "Pesan kamu sudah tersampaikan! Terima kasih.";
+            });
+        }
+
+        function sendToGoogleSheets(tipe, isiPesan, callback) {
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pilihan: tipe,
+                    pesan: isiPesan,
+                    waktu: new Date().toLocaleString("id-ID")
+                })
+            }).then(() => {
+                if (callback) callback();
+            }).catch(err => {
+                console.error("Gagal mengirim:", err);
+                if (callback) callback();
+            });
+        }
+
+        function toggleSound() {
+            isSoundOn = !isSoundOn;
+            document.getElementById('sound-text').textContent = isSoundOn ? 'SUARA: ON' : 'SUARA: OFF';
+        }
+
+        window.onload = () => {
+            setTimeout(typeNextChar, 500);
+        };
+    </script>
+</body>
+  </html>
+  
