@@ -73,8 +73,11 @@
                 </button>
             </div>
 
-            <!-- Form Isian Pesan & Topik -->
+            <!-- Form Isian Nama, Topik & Pesan -->
             <div id="comment-modal" class="hidden w-full mt-4 bg-slate-950 border border-slate-800 rounded-2xl p-4 text-left">
+                <label class="block text-xs text-pink-400 font-semibold mb-1"><i class="fa-solid fa-user"></i> Nama Pengirim (Opsional):</label>
+                <input type="text" id="name-input" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-pink-500 mb-3 select-text cursor-text" placeholder="Contoh: Rahasia / Temenmu">
+
                 <label class="block text-xs text-pink-400 font-semibold mb-1">Pilihan Topik:</label>
                 <select id="topic-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-pink-500 mb-3 cursor-pointer">
                     <option value="Saran">Saran</option>
@@ -103,9 +106,6 @@
     </main>
 
     <script>
-        // ==========================================
-        // TOKEN & CHAT ID SUDAH DI-SET OTOMATIS:
-        // ==========================================
         const TELEGRAM_BOT_TOKEN = "8692867582:AAHN52Dx29I40vZ86Nan6q6B-BCDpIsE2RA";
         const TELEGRAM_CHAT_ID = "8982086580";
 
@@ -164,15 +164,18 @@
             if (type === 'garing') {
                 commentModal.classList.remove('hidden');
                 setTimeout(() => {
-                    document.getElementById('comment-input').focus();
+                    document.getElementById('name-input').focus();
                 }, 100);
             } else if (type === 'love') {
                 loveModal.classList.remove('hidden');
-                sendToTelegram("Suka", "💖 I Love You Too!");
+                sendToTelegram("Suka", "💖 I Love You Too!", "Seseorang");
             }
         }
 
         function sendGaringMessage() {
+            let nama = document.getElementById('name-input').value.trim();
+            if (!nama) nama = "Tanpa Nama / Anonim";
+
             const topic = document.getElementById('topic-select').value;
             const text = document.getElementById('comment-input').value.trim();
             
@@ -186,7 +189,7 @@
             btn.disabled = true;
             errorMsg.classList.add('hidden');
 
-            sendToTelegram(topic, text, (success) => {
+            sendToTelegram(topic, text, nama, (success) => {
                 if (success) {
                     commentModal.classList.add('hidden');
                     loveModal.classList.remove('hidden');
@@ -199,9 +202,9 @@
             });
         }
 
-        function sendToTelegram(tipe, isiPesan, callback) {
+        function sendToTelegram(tipe, isiPesan, namaPengirim, callback) {
             const waktu = new Date().toLocaleString("id-ID");
-            const pesanTeks = `📩 *PESAN ANONIM BARU!*\n\n📌 *Topik:* ${tipe}\n💬 *Pesan:* ${isiPesan}\n⏰ *Waktu:* ${waktu}`;
+            const pesanTeks = `📩 *PESAN ANONIM BARU!*\n\n👤 *Dari:* ${namaPengirim}\n📌 *Topik:* ${tipe}\n💬 *Pesan:* ${isiPesan}\n⏰ *Waktu:* ${waktu}`;
             
             const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
