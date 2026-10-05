@@ -64,13 +64,20 @@
                 <p id="typing-text" class="font-pixel text-sm md:text-base text-pink-300 leading-relaxed cursor-blink"></p>
             </div>
 
-            <div id="choice-buttons" class="hidden flex-col sm:flex-row gap-4 w-full">
-                <button onclick="handleChoice('garing')" class="flex-1 py-3.5 px-6 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-pixel text-xs text-slate-300 transition hover:scale-105 active:scale-95 shadow-lg">
-                    😅 Garing
-                </button>
-                <button onclick="handleChoice('love')" class="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 font-pixel text-xs text-white transition hover:scale-105 active:scale-95 shadow-lg shadow-pink-600/30">
-                    💖 I Love You Too
-                </button>
+            <!-- Tombol Pilihan dengan Keterangan -->
+            <div id="choice-buttons" class="hidden flex-col gap-4 w-full">
+                <div class="flex flex-col sm:flex-row gap-4 w-full">
+                    <button onclick="handleChoice('garing')" class="flex-1 py-3.5 px-6 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-pixel text-xs text-slate-300 transition hover:scale-105 active:scale-95 shadow-lg">
+                        kirim pesan lain
+                    </button>
+                    <button onclick="handleChoice('love')" class="flex-1 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 font-pixel text-xs text-white transition hover:scale-105 active:scale-95 shadow-lg shadow-pink-600/30">
+                        💖 I Love You Too
+                    </button>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 w-full text-[11px] text-slate-400 px-1">
+                    <p class="flex-1 text-center">Mau kirim kritik, saran, tanya, atau pesan bebas?</p>
+                    <p class="flex-1 text-center">Otomatis kirim balasan cinta ke Sarul!</p>
+                </div>
             </div>
 
             <!-- Form Isian Nama, Topik & Pesan -->
@@ -98,7 +105,7 @@
             <!-- Modal Status Berhasil -->
             <div id="love-modal" class="hidden w-full mt-4 bg-pink-950/40 border border-pink-500/40 rounded-2xl p-5 text-center">
                 <p class="font-pixel text-xs text-pink-300 mb-2">Aww, makasih! 🥰❤️</p>
-                <p id="love-status" class="text-xs text-slate-300">Pesan kamu berhasil terkirim via Telegram!</p>
+                <p id="love-status" class="text-xs text-slate-300">Pesan kamu berhasil terkirim!</p>
             </div>
 
         </section>
@@ -110,6 +117,7 @@
         const TELEGRAM_CHAT_ID = "8982086580";
 
         const dialogLines = [
+            "dari sarul...",
             "buah nangka...",
             "buah kedondong...",
             "i love you beb ❤️"
