@@ -89,13 +89,13 @@
                 <button id="btn-send-garing" onclick="sendGaringMessage()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 font-pixel text-xs text-white rounded-xl transition flex items-center justify-center gap-2">
                     <i class="fa-solid fa-paper-plane"></i> Kirim Pesan
                 </button>
-                <p id="error-msg" class="hidden text-xs text-red-500 mt-2 text-center font-bold">Error: Cek koneksi Termux/Tunnel!</p>
+                <p id="error-msg" class="hidden text-xs text-red-500 mt-2 text-center font-bold">Error: Gagal mengirim pesan!</p>
             </div>
 
             <!-- Modal Status Berhasil -->
             <div id="love-modal" class="hidden w-full mt-4 bg-pink-950/40 border border-pink-500/40 rounded-2xl p-5 text-center">
                 <p class="font-pixel text-xs text-pink-300 mb-2">Aww, makasih! 🥰❤️</p>
-                <p id="love-status" class="text-xs text-slate-300">Pesan kamu berhasil terkirim ke Termux!</p>
+                <p id="love-status" class="text-xs text-slate-300">Pesan kamu berhasil terkirim via Telegram!</p>
             </div>
 
         </section>
@@ -103,8 +103,11 @@
     </main>
 
     <script>
-        // URL Cloudflared Termux Terbaru
-        const TERMUX_URL = "https://henderson-consumer-races-rick.trycloudflare.com/pesan";
+        // ==========================================
+        // TOKEN & CHAT ID SUDAH DI-SET OTOMATIS:
+        // ==========================================
+        const TELEGRAM_BOT_TOKEN = "8692867582:AAHN52Dx29I40vZ86Nan6q6B-BCDpIsE2RA";
+        const TELEGRAM_CHAT_ID = "8982086580";
 
         const dialogLines = [
             "buah nangka...",
@@ -165,7 +168,7 @@
                 }, 100);
             } else if (type === 'love') {
                 loveModal.classList.remove('hidden');
-                sendToTermux("Suka", "💖 I Love You Too!");
+                sendToTelegram("Suka", "💖 I Love You Too!");
             }
         }
 
@@ -183,27 +186,32 @@
             btn.disabled = true;
             errorMsg.classList.add('hidden');
 
-            sendToTermux(topic, text, (success) => {
+            sendToTelegram(topic, text, (success) => {
                 if (success) {
                     commentModal.classList.add('hidden');
                     loveModal.classList.remove('hidden');
-                    document.getElementById('love-status').textContent = "Pesan kamu sudah tersampaikan! Terima kasih.";
+                    document.getElementById('love-status').textContent = "Pesan kamu sudah tersampaikan ke Telegram!";
                 } else {
                     btn.innerText = "Kirim Pesan";
                     btn.disabled = false;
-                    errorMsg.classList.remove('hidden');
+                    errorMsg.classList.add('hidden');
                 }
             });
         }
 
-        function sendToTermux(tipe, isiPesan, callback) {
-            fetch(TERMUX_URL, {
+        function sendToTelegram(tipe, isiPesan, callback) {
+            const waktu = new Date().toLocaleString("id-ID");
+            const pesanTeks = `📩 *PESAN ANONIM BARU!*\n\n📌 *Topik:* ${tipe}\n💬 *Pesan:* ${isiPesan}\n⏰ *Waktu:* ${waktu}`;
+            
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+
+            fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    pilihan: tipe,
-                    pesan: isiPesan,
-                    waktu: new Date().toLocaleString("id-ID")
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: pesanTeks,
+                    parse_mode: 'Markdown'
                 })
             })
             .then(res => {
